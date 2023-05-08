@@ -1,6 +1,0 @@
-langchain
-pymupdf
-chromadb
-openai
-gradio==3.15.0
-tiktoken
