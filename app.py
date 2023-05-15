@@ -65,4 +65,4 @@
 #
 
 if __name__ == "__main__":
-    print("构建测试通过！")
+    print("Travis CI构建测试通过！")
