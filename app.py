@@ -2,7 +2,7 @@ import gradio as gr
 
 from langchain.document_loaders import PyMuPDFLoader  # for loading the pdf
 from langchain.embeddings import OpenAIEmbeddings  # for creating embeddings
-from langchain.vectorstores import Chroma  # for the vectorization part
+from langchain.vectorstores import FAISS  # for the vectorization part
 from langchain.chains import ChatVectorDBChain  # for chatting with the pdf
 from langchain.llms import OpenAI  # the LLM model we'll use (CHatGPT)
 
@@ -14,7 +14,7 @@ class Chat:
         pages = loader.load_and_split()
 
         embeddings = OpenAIEmbeddings(openai_api_key=self.api)
-        vectordb = Chroma.from_documents(pages, embedding=embeddings, persist_directory=".")
+        vectordb = FAISS.from_documents(pages, embedding=embeddings, persist_directory=".")
         vectordb.persist()
 
         self.pdf_qa = ChatVectorDBChain.from_llm(OpenAI(temperature=0.9, model_name="gpt-3.5-turbo",
