@@ -61,7 +61,7 @@ with gr.Blocks() as demo:
 
 if __name__ == "__main__":
     demo.title = "ChatPDF Based on Langchain"
-    demo.launch()
+    demo.launch(share=True)
 
 
 # if __name__ == "__main__":
