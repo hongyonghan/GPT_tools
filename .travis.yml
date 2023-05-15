@@ -8,7 +8,7 @@ env:
      - TRAVIS=true
 
 install:
-    - pip install -r requirements.txt.txt
+    - pip install -r requirements.txt
 
 script:
     python app.py
