@@ -3,7 +3,7 @@ sudo: enabled
 dist: bionic
 
 python:
-    - "3.8"
+    - "3.10"
 env:
     global:
      - TRAVIS=true
