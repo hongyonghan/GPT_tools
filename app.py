@@ -1,20 +1,30 @@
 import gradio as gr
 
-from langchain.document_loaders import PyMuPDFLoader  # for loading the pdf
+from langchain.document_loaders import PyPDFLoader  # for loading the pdf
 from langchain.embeddings import OpenAIEmbeddings  # for creating embeddings
-from langchain.vectorstores import FAISS  # for the vectorization part
+from langchain.vectorstores import Chroma  # for the vectorization part
 from langchain.chains import ChatVectorDBChain  # for chatting with the pdf
 from langchain.llms import OpenAI  # the LLM model we'll use (CHatGPT)
-
+import shutil
+import os
 
 class Chat:
     def __init__(self, pdf, api_input):
         self.api = api_input
-        loader = PyMuPDFLoader(pdf)
+        db = os.getcwd() + "/db"
+        index = os.getcwd() + "/index"
+        print(db)
+        print(index)
+
+        shutil.rmtree(db)
+        shutil.rmtree(index)
+
+        loader = PyPDFLoader(pdf)
         pages = loader.load_and_split()
 
+
         embeddings = OpenAIEmbeddings(openai_api_key=self.api)
-        vectordb = FAISS.from_documents(pages, embedding=embeddings, persist_directory=".")
+        vectordb = Chroma.from_documents(pages, embedding=embeddings, persist_directory="db")
         vectordb.persist()
 
         self.pdf_qa = ChatVectorDBChain.from_llm(OpenAI(temperature=0.9, model_name="gpt-3.5-turbo",
@@ -30,7 +40,6 @@ class Chat:
 
 
 def analyse(pdf_file, api_input):
-    print(pdf_file.name)
     session = Chat(pdf_file.name, api_input)
     return session, "文章分析完成"
 
@@ -61,8 +70,5 @@ with gr.Blocks() as demo:
 
 if __name__ == "__main__":
     demo.title = "ChatPDF Based on Langchain"
-    demo.launch(share=True)
-
-
-# if __name__ == "__main__":
-#     print("Travis CI构建测试通过！")
+    demo.queue().launch(inbrowser=True,show_api=False,server_name="0.0.0.0",server_port=8000)
+    demo.close()
