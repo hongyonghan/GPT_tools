@@ -3,9 +3,7 @@ import os
 import random
 import re
 import string
-
 import gradio as gr
-
 import openai
 from icrawler import ImageDownloader
 from icrawler.builtin import BingImageCrawler
@@ -24,7 +22,7 @@ from langchain.embeddings import OpenAIEmbeddings  # for creating embeddings
 from langchain.vectorstores import Chroma  # for the vectorization part
 from langchain.chains import ChatVectorDBChain  # for chatting with the pdf
 from langchain.llms import OpenAI  # the LLM model we'll use (CHatGPT)
-import shutil
+
 import os
 
 class Chat:
@@ -360,32 +358,12 @@ def generate_ppt(file, api_key,topic="default", slide_length=6):
         return f"./{name_}.pptx"
 
 
-
     delete_all_slides()
 
     # parse_response(response['choices'][0]['message']['content'])
     name = get_pdf_content()
-
-    # name_ = str(uuid4()).replace('-', '')
-    #
-    # root.save(f"./{name_}.pptx")
-    #
-    # print("done")
-    #
-    # dir_path = "./"
-    # prefix = "prefix_"
-    #
-    # for file_name in os.listdir(dir_path):
-    #     if file_name.startswith(prefix):
-    #         file_path = os.path.join(dir_path, file_name)
-    #         if os.path.isfile(file_path):
-    #             os.remove(file_path)
-
-    # return f"./{name_}.pptx"
     return name
 
-
-# def write_PPT():
 
 with gr.Blocks(title="ChatGPT PPT框架生成") as demo:
     gr.Markdown("""<h1><center>ChatGPT For PPT</center></h1>""")
@@ -404,19 +382,8 @@ with gr.Blocks(title="ChatGPT PPT框架生成") as demo:
     ask_button.click(ask_question, inputs=[data, question_input], outputs=answer)
     with gr.Row():
         with gr.Column():
-            # openai_token = gr.Textbox(label="OpenAI API Key")
-            # topic = gr.Textbox(label="PPT的主题或内容")
-            # length = gr.Slider(minimum=1, maximum=20, value=6, label="生成的PPT页数", step=1)
             theme = gr.File(value="./theme.pptx", file_types=['pptx', 'ppt'], label="PPT模版")
             output_file = gr.File(interactive=False)
-
-            # topic.submit(
-            #     fn=generate_ppt,
-            #     inputs=[theme, topic, length, api_input],
-            #     # inputs=[theme, openai_token],
-            #     outputs=[output_file]
-            # )
-
             submit = gr.Button("生成")
             submit.click(
                 fn=generate_ppt,
