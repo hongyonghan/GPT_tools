@@ -91,73 +91,73 @@ class PrefixNameDownloader(ImageDownloader):
             task, default_ext)
         print(bad_coding_practice)
         return 'prefix_' + bad_coding_practice + filename
-def generate_ppt(file, topic, slide_length, api_key):
+def generate_ppt(file, api_key,topic="default", slide_length=6):
     print(file.name)
 
     root = Presentation(file.name)
 
     openai.api_key = api_key
 
-    message = f"""
-    Create content for a slideshow presentation.
-    The content's topic is {topic}. 
-    The slideshow is {slide_length} slides long. 
-    The content is written in the language of the content I give you above.
-    
-    
-    You are allowed to use the following slide types:
-    
-    Slide types:
-    Title Slide - (Title, Subtitle)
-    Content Slide - (Title, Content)
-    Image Slide - (Title, Content, Image)
-    Thanks Slide - (Title)
-    
-    Put this tag before the Title Slide: [L_TS]
-    Put this tag before the Content Slide: [L_CS]
-    Put this tag before the Image Slide: [L_IS]
-    Put this tag before the Thanks Slide: [L_THS]
-    
-    Put "[SLIDEBREAK]" after each slide 
-    
-    For example:
-    [L_TS]
-    [TITLE]Mental Health[/TITLE]
-    
-    [SLIDEBREAK]
-    
-    [L_CS] 
-    [TITLE]Mental Health Definition[/TITLE]
-    [CONTENT]
-    1. Definition: A person’s condition with regard to their psychological and emotional well-being
-    2. Can impact one's physical health
-    3. Stigmatized too often.
-    [/CONTENT]
-    
-    [SLIDEBREAK]
-    
-    Put this tag before the Title: [TITLE]
-    Put this tag after the Title: [/TITLE]
-    Put this tag before the Subitle: [SUBTITLE]
-    Put this tag after the Subtitle: [/SUBTITLE]
-    Put this tag before the Content: [CONTENT]
-    Put this tag after the Content: [/CONTENT]
-    Put this tag before the Image: [IMAGE]
-    Put this tag after the Image: [/IMAGE]
-    
-    Elaborate on the Content, provide as much information as possible.
-    You put a [/CONTENT] at the end of the Content.
-    Do not reply as if you are talking about the slideshow itself. (ex. "Include pictures here about...")
-    Do not include any special characters (?, !, ., :, ) in the Title.
-    Do not include any additional information in your response and stick to the format."""
-
-    openai.proxy = {'http': "http://127.0.0.1:8001", 'https': 'http://127.0.0.1:8001'}
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "user", "content": message}
-        ]
-    )
+    # message = f"""
+    # Create content for a slideshow presentation.
+    # The content's topic is {topic}.
+    # The slideshow is {slide_length} slides long.
+    # The content is written in the language of the content I give you above.
+    #
+    #
+    # You are allowed to use the following slide types:
+    #
+    # Slide types:
+    # Title Slide - (Title, Subtitle)
+    # Content Slide - (Title, Content)
+    # Image Slide - (Title, Content, Image)
+    # Thanks Slide - (Title)
+    #
+    # Put this tag before the Title Slide: [L_TS]
+    # Put this tag before the Content Slide: [L_CS]
+    # Put this tag before the Image Slide: [L_IS]
+    # Put this tag before the Thanks Slide: [L_THS]
+    #
+    # Put "[SLIDEBREAK]" after each slide
+    #
+    # For example:
+    # [L_TS]
+    # [TITLE]Mental Health[/TITLE]
+    #
+    # [SLIDEBREAK]
+    #
+    # [L_CS]
+    # [TITLE]Mental Health Definition[/TITLE]
+    # [CONTENT]
+    # 1. Definition: A person’s condition with regard to their psychological and emotional well-being
+    # 2. Can impact one's physical health
+    # 3. Stigmatized too often.
+    # [/CONTENT]
+    #
+    # [SLIDEBREAK]
+    #
+    # Put this tag before the Title: [TITLE]
+    # Put this tag after the Title: [/TITLE]
+    # Put this tag before the Subitle: [SUBTITLE]
+    # Put this tag after the Subtitle: [/SUBTITLE]
+    # Put this tag before the Content: [CONTENT]
+    # Put this tag after the Content: [/CONTENT]
+    # Put this tag before the Image: [IMAGE]
+    # Put this tag after the Image: [/IMAGE]
+    #
+    # Elaborate on the Content, provide as much information as possible.
+    # You put a [/CONTENT] at the end of the Content.
+    # Do not reply as if you are talking about the slideshow itself. (ex. "Include pictures here about...")
+    # Do not include any special characters (?, !, ., :, ) in the Title.
+    # Do not include any additional information in your response and stick to the format."""
+    #
+    # openai.proxy = {'http': "http://127.0.0.1:8001", 'https': 'http://127.0.0.1:8001'}
+    # response = openai.ChatCompletion.create(
+    #     model="gpt-3.5-turbo",
+    #     messages=[
+    #         {"role": "user", "content": message}
+    #     ]
+    # )
 
     # """ Ref for slide types:
     # 0 -> title and subtitle
@@ -276,21 +276,17 @@ def generate_ppt(file, topic, slide_length, api_key):
         return root.slides[0].shapes.title.text
 
     def get_pdf_content():
-        title = get_result("论文的标题")
+        papertitle = get_result("论文的标题")
         author = get_result("论文的作者")
-        contribution = get_result("论文的贡献点")
-        datasets = get_result("论文的数据集")
-        methods = get_result("论文的方法")
-        result = get_result("论文的结果")
-
         title_slide_layout = root.slide_layouts[0]
         slide = root.slides.add_slide(title_slide_layout)
         title = slide.shapes.title
         subtitle = slide.placeholders[1]
-        title.text = title
+        title.text = papertitle
         subtitle.text = author
 
         #create 2nd slide
+        contribution = get_result("论文的贡献点")
         bullet_slide_layout1 = root.slide_layouts[1]
         slide2 = root.slides.add_slide(bullet_slide_layout1)
         shapes2 = slide2.shapes
@@ -300,6 +296,9 @@ def generate_ppt(file, topic, slide_length, api_key):
         tf2 = body_shape2.text_frame
         tf2.text = contribution
         # create 3nd slide
+
+        datasets = get_result("论文的数据集")
+
         slide3 = root.slides.add_slide(bullet_slide_layout1)
         shapes3 = slide3.shapes
         title_shape3 = shapes3.title
@@ -309,6 +308,8 @@ def generate_ppt(file, topic, slide_length, api_key):
         tf3.text = datasets
 
         # create 4nd slide
+        methods = get_result("论文的方法")
+
         slide4 = root.slides.add_slide(bullet_slide_layout1)
         shapes4 = slide4.shapes
         title_shape4 = shapes4.title
@@ -318,6 +319,7 @@ def generate_ppt(file, topic, slide_length, api_key):
         tf4.text = methods
 
         # create 5nd slide
+        result = get_result("论文的结果")
         slide5 = root.slides.add_slide(bullet_slide_layout1)
         shapes5 = slide5.shapes
         title_shape5 = shapes5.title
@@ -332,28 +334,47 @@ def generate_ppt(file, topic, slide_length, api_key):
         title6 = slide6.shapes.title
         title6.text = "谢谢大家!"
 
+        name_ = str(uuid4()).replace('-', '')
+
+        root.save(f"./{name_}.pptx")
+
+        print("done")
+
+        dir_path = "./"
+        prefix = "prefix_"
+
+        for file_name in os.listdir(dir_path):
+            if file_name.startswith(prefix):
+                file_path = os.path.join(dir_path, file_name)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+
+        return f"./{name_}.pptx"
+
 
 
     delete_all_slides()
 
-    parse_response(response['choices'][0]['message']['content'])
+    # parse_response(response['choices'][0]['message']['content'])
+    name = get_pdf_content()
 
-    name_ = str(uuid4()).replace('-', '')
+    # name_ = str(uuid4()).replace('-', '')
+    #
+    # root.save(f"./{name_}.pptx")
+    #
+    # print("done")
+    #
+    # dir_path = "./"
+    # prefix = "prefix_"
+    #
+    # for file_name in os.listdir(dir_path):
+    #     if file_name.startswith(prefix):
+    #         file_path = os.path.join(dir_path, file_name)
+    #         if os.path.isfile(file_path):
+    #             os.remove(file_path)
 
-    root.save(f"./{name_}.pptx")
-
-    print("done")
-
-    dir_path = "./"
-    prefix = "prefix_"
-
-    for file_name in os.listdir(dir_path):
-        if file_name.startswith(prefix):
-            file_path = os.path.join(dir_path, file_name)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-
-    return f"./{name_}.pptx"
+    # return f"./{name_}.pptx"
+    return name
 
 
 # def write_PPT():
@@ -375,7 +396,7 @@ with gr.Blocks(title="ChatGPT PPT框架生成") as demo:
     ask_button.click(ask_question, inputs=[data, question_input], outputs=answer)
     with gr.Row():
         with gr.Column():
-            openai_token = gr.Textbox(label="OpenAI API Key")
+            # openai_token = gr.Textbox(label="OpenAI API Key")
             topic = gr.Textbox(label="PPT的主题或内容")
             length = gr.Slider(minimum=1, maximum=20, value=6, label="生成的PPT页数", step=1)
             theme = gr.File(value="./theme.pptx", file_types=['pptx', 'ppt'], label="PPT模版")
@@ -383,14 +404,15 @@ with gr.Blocks(title="ChatGPT PPT框架生成") as demo:
 
             topic.submit(
                 fn=generate_ppt,
-                inputs=[theme, topic, length, openai_token],
+                inputs=[theme, topic, length, api_input],
+                # inputs=[theme, openai_token],
                 outputs=[output_file]
             )
 
             submit = gr.Button("生成")
             submit.click(
                 fn=generate_ppt,
-                inputs=[theme, topic, length, openai_token],
+                inputs=[theme, topic, length, api_input],
                 outputs=[output_file]
             )
 
