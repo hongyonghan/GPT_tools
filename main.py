@@ -28,6 +28,7 @@ import os
 class Chat:
     def __init__(self, pdf, api_input):
         self.api = api_input
+        os.environ["OPENAI_API_KEY"] = self.api
         # db = os.getcwd() + "/db"
         # index = os.getcwd() + "/index"
         # print(db)
@@ -56,6 +57,19 @@ class Chat:
         return result["answer"]
 
 
+def get_result(query):
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    vectordb = Chroma(persist_directory='db', embedding_function=embeddings)
+
+    pdf_qa = ChatVectorDBChain.from_llm(OpenAI(temperature=0.9, model_name="gpt-3.5-turbo",
+                                                    openai_api_key=openai_api_key),
+                                             vectordb, return_source_documents=True)
+    result = pdf_qa({"question": "请使用中文回答" + query, "chat_history": ""})
+
+    return result["answer"]
+
+
 def analyse(pdf_file, api_input):
     session = Chat(pdf_file.name, api_input)
     return session, "文章分析完成"
@@ -65,15 +79,11 @@ def ask_question(data, question):
     if data == "":
         return "Please upload PDF file first!"
     return data.question(question)
-
-
 def refresh_bad_coding_practice():
     global bad_coding_practice
     bad_coding_practice = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
                                   for _ in range(16))
     return
-
-
 class PrefixNameDownloader(ImageDownloader):
 
     def get_filename(self, task, default_ext):
@@ -81,8 +91,6 @@ class PrefixNameDownloader(ImageDownloader):
             task, default_ext)
         print(bad_coding_practice)
         return 'prefix_' + bad_coding_practice + filename
-
-
 def generate_ppt(file, topic, slide_length, api_key):
     print(file.name)
 
@@ -241,6 +249,7 @@ def generate_ppt(file, topic, slide_length, api_key):
         list_of_slides = reply.split("[SLIDEBREAK]")
         for slide in list_of_slides:
             slide_type = search_for_slide_type(slide)
+            # print("1",str(slide))
             if slide_type == "[L_TS]":
                 create_title_slide(find_text_in_between_tags(str(slide), "[TITLE]", "[/TITLE]"),
                                    find_text_in_between_tags(str(slide), "[SUBTITLE]", "[/SUBTITLE]"))
@@ -266,6 +275,34 @@ def generate_ppt(file, topic, slide_length, api_key):
     def find_title():
         return root.slides[0].shapes.title.text
 
+    def get_pdf_content():
+        title = get_result("论文的标题")
+        author = get_result("论文的作者")
+        contribution = get_result("论文的贡献")
+        result = get_result("论文的结果")
+
+        title_slide_layout = root.slide_layouts[0]
+        slide = root.slides.add_slide(title_slide_layout)
+        title = slide.shapes.title
+        subtitle = slide.placeholders[1]
+        title.text = title
+        subtitle.text = author
+
+        #create
+        bullet_slide_layout1 = root.slide_layouts[1]
+
+        slide1 = root.slides.add_slide(bullet_slide_layout1)
+        shapes1 = slide1.shapes
+
+        title_shape1 = shapes1.title
+        body_shape1 = shapes1.placeholders[1]
+
+        title_shape1.text = 'Adding a Bullet Slide'
+
+        tf1 = body_shape1.text_frame
+        tf1.text = 'Find the bullet slide layout'
+
+
     delete_all_slides()
 
     parse_response(response['choices'][0]['message']['content'])
@@ -288,12 +325,15 @@ def generate_ppt(file, topic, slide_length, api_key):
     return f"./{name_}.pptx"
 
 
+# def write_PPT():
+
 with gr.Blocks(title="ChatGPT PPT框架生成") as demo:
     gr.Markdown("""<h1><center>ChatGPT For PPT</center></h1>""")
     data = gr.State()
     with gr.Tab("Upload PDF File"):
         pdf_input = gr.File(label="PDF File")
         api_input = gr.Textbox(label="OpenAI API Key")
+
         result = gr.Textbox()
         upload_button = gr.Button("Start Analyse")
         question_input = gr.Textbox(label="Your Question", placeholder="Authors of this paper?")
