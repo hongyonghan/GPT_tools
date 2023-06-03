@@ -278,7 +278,9 @@ def generate_ppt(file, topic, slide_length, api_key):
     def get_pdf_content():
         title = get_result("论文的标题")
         author = get_result("论文的作者")
-        contribution = get_result("论文的贡献")
+        contribution = get_result("论文的贡献点")
+        datasets = get_result("论文的数据集")
+        methods = get_result("论文的方法")
         result = get_result("论文的结果")
 
         title_slide_layout = root.slide_layouts[0]
@@ -288,19 +290,48 @@ def generate_ppt(file, topic, slide_length, api_key):
         title.text = title
         subtitle.text = author
 
-        #create
+        #create 2nd slide
         bullet_slide_layout1 = root.slide_layouts[1]
+        slide2 = root.slides.add_slide(bullet_slide_layout1)
+        shapes2 = slide2.shapes
+        title_shape2 = shapes2.title
+        body_shape2 = shapes2.placeholders[1]
+        title_shape2.text = '论文的贡献点'
+        tf2 = body_shape2.text_frame
+        tf2.text = contribution
+        # create 3nd slide
+        slide3 = root.slides.add_slide(bullet_slide_layout1)
+        shapes3 = slide3.shapes
+        title_shape3 = shapes3.title
+        body_shape3 = shapes3.placeholders[1]
+        title_shape3.text = '论文的数据集'
+        tf3 = body_shape3.text_frame
+        tf3.text = datasets
 
-        slide1 = root.slides.add_slide(bullet_slide_layout1)
-        shapes1 = slide1.shapes
+        # create 4nd slide
+        slide4 = root.slides.add_slide(bullet_slide_layout1)
+        shapes4 = slide4.shapes
+        title_shape4 = shapes4.title
+        body_shape4 = shapes4.placeholders[1]
+        title_shape4.text = '论文的方法'
+        tf4 = body_shape4.text_frame
+        tf4.text = methods
 
-        title_shape1 = shapes1.title
-        body_shape1 = shapes1.placeholders[1]
+        # create 5nd slide
+        slide5 = root.slides.add_slide(bullet_slide_layout1)
+        shapes5 = slide5.shapes
+        title_shape5 = shapes5.title
+        body_shape5 = shapes5.placeholders[1]
+        title_shape5.text = '论文的结果'
+        tf5 = body_shape4.text_frame
+        tf5.text = result
 
-        title_shape1.text = 'Adding a Bullet Slide'
+        # create 6nd slide
+        title_slide_layout = root.slide_layouts[0]
+        slide6 = root.slides.add_slide(title_slide_layout)
+        title6 = slide6.shapes.title
+        title6.text = "谢谢大家!"
 
-        tf1 = body_shape1.text_frame
-        tf1.text = 'Find the bullet slide layout'
 
 
     delete_all_slides()
