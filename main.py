@@ -11,6 +11,8 @@ from icrawler import ImageDownloader
 from icrawler.builtin import BingImageCrawler
 from uuid import uuid4
 from pptx import Presentation
+import time
+
 
 bad_coding_practice = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in
                               range(16))
@@ -151,7 +153,7 @@ def generate_ppt(file, api_key,topic="default", slide_length=6):
     # Do not include any special characters (?, !, ., :, ) in the Title.
     # Do not include any additional information in your response and stick to the format."""
     #
-    # openai.proxy = {'http': "http://127.0.0.1:8001", 'https': 'http://127.0.0.1:8001'}
+    openai.proxy = {'http': "http://127.0.0.1:8001", 'https': 'http://127.0.0.1:8001'}
     # response = openai.ChatCompletion.create(
     #     model="gpt-3.5-turbo",
     #     messages=[
@@ -285,27 +287,31 @@ def generate_ppt(file, api_key,topic="default", slide_length=6):
         title.text = papertitle
         subtitle.text = author
 
+        time.sleep(10)
+
         #create 2nd slide
-        contribution = get_result("论文的贡献点")
+        problem = get_result("论文解决的问题")
         bullet_slide_layout1 = root.slide_layouts[1]
         slide2 = root.slides.add_slide(bullet_slide_layout1)
         shapes2 = slide2.shapes
         title_shape2 = shapes2.title
         body_shape2 = shapes2.placeholders[1]
-        title_shape2.text = '论文的贡献点'
+        title_shape2.text = '论文解决的问题'
         tf2 = body_shape2.text_frame
-        tf2.text = contribution
+        tf2.text = problem
         # create 3nd slide
+        time.sleep(10)
 
-        datasets = get_result("论文的数据集")
+        # datasets = get_result("论文使用的数据集")
+        #
+        # slide3 = root.slides.add_slide(bullet_slide_layout1)
+        # shapes3 = slide3.shapes
+        # title_shape3 = shapes3.title
+        # body_shape3 = shapes3.placeholders[1]
+        # title_shape3.text = '论文的数据集'
+        # tf3 = body_shape3.text_frame
+        # tf3.text = datasets
 
-        slide3 = root.slides.add_slide(bullet_slide_layout1)
-        shapes3 = slide3.shapes
-        title_shape3 = shapes3.title
-        body_shape3 = shapes3.placeholders[1]
-        title_shape3.text = '论文的数据集'
-        tf3 = body_shape3.text_frame
-        tf3.text = datasets
 
         # create 4nd slide
         methods = get_result("论文的方法")
@@ -318,6 +324,8 @@ def generate_ppt(file, api_key,topic="default", slide_length=6):
         tf4 = body_shape4.text_frame
         tf4.text = methods
 
+        time.sleep(10)
+
         # create 5nd slide
         result = get_result("论文的结果")
         slide5 = root.slides.add_slide(bullet_slide_layout1)
@@ -325,7 +333,7 @@ def generate_ppt(file, api_key,topic="default", slide_length=6):
         title_shape5 = shapes5.title
         body_shape5 = shapes5.placeholders[1]
         title_shape5.text = '论文的结果'
-        tf5 = body_shape4.text_frame
+        tf5 = body_shape5.text_frame
         tf5.text = result
 
         # create 6nd slide
@@ -397,22 +405,22 @@ with gr.Blocks(title="ChatGPT PPT框架生成") as demo:
     with gr.Row():
         with gr.Column():
             # openai_token = gr.Textbox(label="OpenAI API Key")
-            topic = gr.Textbox(label="PPT的主题或内容")
-            length = gr.Slider(minimum=1, maximum=20, value=6, label="生成的PPT页数", step=1)
+            # topic = gr.Textbox(label="PPT的主题或内容")
+            # length = gr.Slider(minimum=1, maximum=20, value=6, label="生成的PPT页数", step=1)
             theme = gr.File(value="./theme.pptx", file_types=['pptx', 'ppt'], label="PPT模版")
             output_file = gr.File(interactive=False)
 
-            topic.submit(
-                fn=generate_ppt,
-                inputs=[theme, topic, length, api_input],
-                # inputs=[theme, openai_token],
-                outputs=[output_file]
-            )
+            # topic.submit(
+            #     fn=generate_ppt,
+            #     inputs=[theme, topic, length, api_input],
+            #     # inputs=[theme, openai_token],
+            #     outputs=[output_file]
+            # )
 
             submit = gr.Button("生成")
             submit.click(
                 fn=generate_ppt,
-                inputs=[theme, topic, length, api_input],
+                inputs=[theme,api_input],
                 outputs=[output_file]
             )
 
