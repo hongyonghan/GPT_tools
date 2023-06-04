@@ -9,7 +9,6 @@ COPY requirements.txt /app/
 COPY db/* /app/db
 COPY index/* /app/index
 COPY main.py /app/
-COPY run.sh /app/
 COPY theme.pptx /app/
 COPY chroma-collections.parquet /app/
 COPY chroma-embeddings.parquet /app/
