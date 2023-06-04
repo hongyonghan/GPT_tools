@@ -21,4 +21,4 @@ WORKDIR /app
 
 EXPOSE 8000
 
-ENTRYPOINT ["sh","run.sh"]
+ENTRYPOINT ["python","-u","main.py",">1.log"]
